@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Lab9
 {
     internal static class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            Number1.Program.Start();
+            await Number1.Program.Start();
         }
     }
 }
@@ -22,12 +22,16 @@ namespace Number1
         /// В заданном тексте определить частоту, с которой встречаются в
         /// тексте различные буквы русского алфавита (в долях от общего количества букв).
         /// </summary>
-        public static void Start()
+        public static async Task Start()
         {
             var alphabet =
                 Enumerable.Range('а', 32).ToDictionary(x => (char)x, x => 0);
-            var streamReader = new StreamReader("Input.txt");
-            string text = streamReader.ReadToEnd().ToLower();
+            string text;
+            using (var streamReader = new StreamReader("Input.txt"))
+            {
+                text = (await streamReader.ReadToEndAsync()).ToLower();
+            }
+
             double totalChars = 0;
 
             foreach (var t in text)
@@ -39,15 +43,19 @@ namespace Number1
                 }
             }
 
-            foreach (var t in alphabet)
+            using (var writer = new StreamWriter("Output.txt", false))
             {
-                Console.WriteLine($"{t.Key}: {t.Value / totalChars * 100:f2}%");
+                foreach (var t in alphabet)
+                {
+                    await writer.WriteLineAsync($"{t.Key}: {t.Value / totalChars * 100:f2}%");
+                }
             }
+            Console.WriteLine($"Complete, path route: {Environment.CurrentDirectory}\\Output.txt");
         }
     }
 }
 
-namespace Number5   
+namespace Number5
 {
     /// <summary>
     /// Задан текст, содержащий не более 1000 символов. Напечатать буквы,
@@ -55,14 +63,18 @@ namespace Number5
     /// </summary>
     internal static class Program
     {
-        public static void Start()
+        public static async Task Start()
         {
             var alphabet =
                 Enumerable.Range('а', 32).ToDictionary(x => (char)x, x => 0);
-            var streamReader = new StreamReader("Input.txt");
-            string text = streamReader.ReadToEnd().ToLower();
+            string text;
+            using (var streamReader = new StreamReader("Input.txt"))
+            {
+                text = (await streamReader.ReadToEndAsync()).ToLower();
+            }
+
             double totalChars = 0;
-            
+
             char last = '\n';
             foreach (var t in text)
             {
@@ -74,13 +86,19 @@ namespace Number5
 
                 last = t;
             }
-            
-            alphabet = (from entry in alphabet orderby entry.Value descending select entry).ToDictionary(x => x.Key, x=> x.Value);
 
-            foreach (var t in alphabet)
+            alphabet = (from entry in alphabet orderby entry.Value descending select entry).ToDictionary(x => x.Key,
+                x => x.Value);
+
+            using (var writer = new StreamWriter("Output.txt", false))
             {
-                Console.WriteLine($"{t.Key}: {t.Value / totalChars * 100:f2}%");
+                foreach (var t in alphabet)
+                {
+                    await writer.WriteLineAsync($"{t.Key}: {t.Value / totalChars * 100:f2}%");
+                }
             }
+
+            Console.WriteLine($"Complete, path route: {Environment.CurrentDirectory}\\Output.txt");
         }
     }
 }
